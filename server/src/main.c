@@ -60,7 +60,8 @@ int main() {
 	write(STDOUT_FILENO, buf, nread); // protect
 	write(client_fd, buf, nread); // protect
 
-//	close(client_fd);
-//	close(server_fd);
+	sleep(1);
+	close(client_fd);
+	close(server_fd);
 	return (0);
 }
