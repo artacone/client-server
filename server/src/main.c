@@ -12,22 +12,36 @@ int main() {
 	Listen(server_fd, LISTEN_BL);
 
 	socklen_t	address_len = sizeof server_address;
-	int client_fd = Accept(server_fd, (struct sockaddr *)&client_address, &address_len);
-	ssize_t	nread;
-	char buf[256];
-	nread = read(client_fd, buf, 256);
-	if (nread == -1) {
-		perror("read failed");
-		exit(EXIT_FAILURE);
-	}
-	if (nread == 0) {
-		printf("END OF FILE occurred\n");
-	}
-	write(STDOUT_FILENO, buf, nread); // protect
-	write(client_fd, buf, nread); // protect
+	while (1)
+	{
+		int client_fd = Accept(server_fd, (struct sockaddr *)&client_address, &address_len);
 
-	sleep(1);
-	close(client_fd);
+		int pid = fork(); // protect
+
+		if (pid == 0) {
+			close(server_fd);
+
+			/* PROCESSING */
+			ssize_t	nread;
+			char buf[256];
+			nread = read(client_fd, buf, 256);
+			if (nread == -1) {
+				perror("read failed");
+				exit(EXIT_FAILURE);
+			}
+			if (nread == 0) {
+				printf("END OF FILE occurred\n");
+			}
+			write(STDOUT_FILENO, buf, nread); // protect
+			write(client_fd, buf, nread); // protect
+
+			sleep(1);
+			exit(EXIT_SUCCESS);
+		} else {
+			close(client_fd);
+		}
+	}
+
 	close(server_fd);
 	return (0);
 }
