@@ -9,6 +9,9 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#define PORT	50000
+#define	SERVER_PORT	50000
+#define	SERVER_IP	"127.0.0.1"
+
+#define	LISTEN_BL	5
 
 #endif
