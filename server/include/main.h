@@ -3,7 +3,7 @@
 
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include <arpa/inet.h> // htons()
+#include <arpa/inet.h>
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -12,10 +12,8 @@
 
 #define USAGE			"Usage:\n./server.out [port_number dir_name]\n"
 #define	DEFAULT_PORT	50000
-#define	SERVER_IP		"127.0.0.1"
-
-#define	LISTEN_BL		5
-
+#define	DEFAULT_DIR		"."
+#define	LISTEN_BACKLOG	5
 #define	BUF_SIZE		4096
 
 typedef struct s_server {
