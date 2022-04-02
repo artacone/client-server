@@ -1,47 +1,51 @@
 #include "../include/main.h"
 #include "../include/wrappers.h"
 
+void init_server(t_server *server) {
+	server->fd = Socket(AF_INET, SOCK_STREAM, 0);
+
+	server->address.sin_family = AF_INET;
+	server->address.sin_port = htons(SERVER_PORT);
+	Bind(server->fd, (struct sockaddr *)&server->address, sizeof server->address);
+	Listen(server->fd, LISTEN_BL);
+}
+
+void receive_file(int client_fd) {
+	char *file_name = "recv.txt";
+	char buf[BUF_SIZE] = {0};
+	int file_fd = open(file_name, O_WRONLY | O_APPEND | O_CREAT, 0644);
+	int n_read = 0;
+	while ((n_read = read(client_fd, buf, sizeof buf))) { // protect
+		if (n_read == -1) {
+			perror("read failed");
+			exit(EXIT_FAILURE);
+		}
+		write(file_fd, buf, n_read); // protect
+	}
+	close(file_fd);
+}
+
 int main() {
-	int	server_fd = Socket(AF_INET, SOCK_STREAM, 0);
-
-	struct sockaddr_in server_address = {0}, client_address = {0};
-	server_address.sin_family = AF_INET;
-	server_address.sin_port = htons(SERVER_PORT);
-	Bind(server_fd, (struct sockaddr *)&server_address, sizeof server_address);
-
-	Listen(server_fd, LISTEN_BL);
-
-	socklen_t	address_len = sizeof server_address;
-	while (1)
-	{
-		int client_fd = Accept(server_fd, (struct sockaddr *)&client_address, &address_len);
+	t_server server = {0};
+	init_server(&server);
+	struct sockaddr_in address = {0};
+	socklen_t address_len = sizeof address;
+	while (1) {
+		int client_fd = Accept(server.fd, (struct sockaddr *)&address, &address_len);
 
 		int pid = fork(); // protect
 
 		if (pid == 0) {
-			close(server_fd);
+			close(server.fd);
 
 			/* PROCESSING */
-			ssize_t	nread;
-			char buf[256];
-			nread = read(client_fd, buf, 256);
-			if (nread == -1) {
-				perror("read failed");
-				exit(EXIT_FAILURE);
-			}
-			if (nread == 0) {
-				printf("END OF FILE occurred\n");
-			}
-			write(STDOUT_FILENO, buf, nread); // protect
-			write(client_fd, buf, nread); // protect
-
-			sleep(1);
+			receive_file(client_fd);
 			exit(EXIT_SUCCESS);
 		} else {
 			close(client_fd);
 		}
 	}
 
-	close(server_fd);
+	close(server.fd);
 	return (0);
 }

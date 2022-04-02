@@ -1,26 +1,38 @@
 #include "../include/main.h"
 #include "../include/wrappers.h"
 
-int main() {
-	int	client_fd = Socket(AF_INET, SOCK_STREAM, 0);
-	struct sockaddr_in address = {0};
-	address.sin_family = AF_INET;
-	address.sin_port = htons(SERVER_PORT);
-	Inet_pton(AF_INET, SERVER_IP, &address.sin_addr);
+void init_client(t_client *client) {
+	client->fd = Socket(AF_INET, SOCK_STREAM, 0);
+	client->address.sin_family = AF_INET;
+	client->address.sin_port = htons(SERVER_PORT);
+	Inet_pton(AF_INET, SERVER_IP, &client->address.sin_addr);
+}
 
-	Connect(client_fd, (struct sockaddr *) &address, sizeof address);
-	write(client_fd, "Hello!\n", 7); // protect
-	char	buf[256];
-	ssize_t	nread;
-	nread = read(client_fd, buf, sizeof buf);
-	if (nread == -1) {
-		perror("read failed");
-		exit(EXIT_FAILURE);
+// TODO proper loop around write
+void send_file(int file_fd, t_client *client) { // or just use sendfile()
+	char buf[BUF_SIZE] = {0};
+	int n_read = 0;
+	while ((n_read = read(file_fd, buf, sizeof buf))) { // FIXME errors
+		if (n_read == -1) {
+			perror("read failed");
+			exit(EXIT_FAILURE);
+		}
+		write(client->fd, buf, n_read); // protect
 	}
-	if (nread == 0) {
-		printf("End Of File occurred\n");
-	}
-	write(STDOUT_FILENO, buf, nread); // protect
-	close(client_fd);
+}
+
+int main() {
+	t_client client = {0};
+	init_client(&client);
+
+	Connect(client.fd, (struct sockaddr *) &client.address, sizeof client.address);
+
+	char *file_name = "send.txt";
+	int file_fd = open(file_name, O_RDONLY); // protect
+
+	send_file(file_fd, &client);
+
+	close(file_fd);
+	close(client.fd);
 	return (0);
 }
