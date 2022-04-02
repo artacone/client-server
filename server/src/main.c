@@ -100,7 +100,6 @@ int main(int argc, char *argv[]) {
 			close(client_fd);
 		}
 	}
-	wait(NULL);
 	close(server.fd);
 	return (0);
 }
