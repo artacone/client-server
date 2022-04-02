@@ -14,9 +14,9 @@
 #define	DEFAULT_PORT	50000
 #define	SERVER_IP		"127.0.0.1"
 
-#define	LISTEN_BL	5
+#define	LISTEN_BL		5
 
-#define	BUF_SIZE	256
+#define	BUF_SIZE		4096
 
 typedef struct s_server {
 	int					fd;

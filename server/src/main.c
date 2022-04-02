@@ -16,7 +16,7 @@ void check_args(int argc, char *argv[], t_server *server) {
 			fprintf(stderr, USAGE);
 			exit(EXIT_FAILURE);
 		}
-		if (0 == access(argv[2], F_OK | W_OK | X_OK)) {
+		if (0 == access(argv[2], W_OK | X_OK)) {
 			server->dir_name = argv[2];
 		} else {
 			perror("access failed");
