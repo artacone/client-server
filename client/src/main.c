@@ -35,16 +35,36 @@ void init_client(t_client *client) {
 	client->address.sin_port = htons(client->server_port);
 	Inet_pton(AF_INET, client->server_ip, &client->address.sin_addr);
 }
-
-// TODO proper loop around write
-void send_file(t_client *client) { // or just use sendfile()
-	int file_fd = open(client->file_name, O_RDONLY); // protect
+// TODO close socket upon every fail to let server know about it
+// not always just exit
+void send_file(t_client *client) { // or just use sendfile() but it's platform specific
+	int file_fd = open(client->file_name, O_RDONLY);
+	if (file_fd == -1) {
+		perror("open failed");
+		close(client->fd);
+		exit(EXIT_FAILURE);
+	}
 	char buf[BUF_SIZE] = {0};
 	int n_read = 0;
-	while ((n_read = read(file_fd, buf, sizeof buf))) { // FIXME errors
+	while (1) {
+		n_read = read(file_fd, buf, sizeof buf);
+		if (n_read == 0) {
+			break;
+		}
 		if (n_read == -1) {
 			perror("read failed");
 			exit(EXIT_FAILURE);
+		}
+		char *p = buf;
+		while (n_read > 0) {
+			int n_written = write(client->fd, p, n_read);
+			if (n_written == -1) {
+				perror("write failed");
+				exit(EXIT_FAILURE); // close
+			}
+			n_read -= n_written;
+			p += n_written;
+
 		}
 		write(client->fd, buf, n_read); // protect
 	}
