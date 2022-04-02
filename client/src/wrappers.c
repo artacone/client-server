@@ -50,6 +50,7 @@ int Inet_pton(int af, const char *restrict src, void *restrict dst) {
 		fprintf(stderr,
 				"inet_pton failed: the address is not parseable"
 				"in the specified address family\n");
+		exit(EXIT_FAILURE);
 	} else if (res == -1) {
 		perror("inet_pton failed");
 		exit(EXIT_FAILURE);
