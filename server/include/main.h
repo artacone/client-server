@@ -10,8 +10,9 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-#define	SERVER_PORT	50000
-#define	SERVER_IP	"127.0.0.1"
+#define USAGE			"Usage:\n./server.out [port_number dir_name]\n"
+#define	DEFAULT_PORT	50000
+#define	SERVER_IP		"127.0.0.1"
 
 #define	LISTEN_BL	5
 
@@ -20,6 +21,8 @@
 typedef struct s_server {
 	int					fd;
 	struct sockaddr_in	address;
+	char				*dir_name;
+	unsigned			port;
 } t_server;
 
 #endif
