@@ -3,7 +3,7 @@
 
 #include <sys/socket.h>
 #include <netinet/in.h>
-#include <arpa/inet.h> // htons() inet_pton()
+#include <arpa/inet.h>
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -13,7 +13,6 @@
 #define USAGE			"Usage:\n./client.out [server_ip server_port file]\n"
 #define	DEFAULT_PORT	50000
 #define	DEFAULT_IP		"127.0.0.1"
-
 #define	BUF_SIZE		4096
 
 typedef struct s_client {

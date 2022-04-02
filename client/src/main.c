@@ -1,6 +1,14 @@
 #include "../include/main.h"
 #include "../include/wrappers.h"
 
+/**
+ * Checks program's args and sets parameters of the connection accordingly.
+ * If no args recieved sets default parameters.
+ * If args are incorrect or of a wrong number outputs Usage to stderr.
+ * @param argc number of arguments
+ * @param argv program's arguments
+ * @param client pointer to the client struct
+ */
 void check_args(int argc, char *argv[], t_client *client) {
 	if (argc == 1) {
 		client->server_port = DEFAULT_PORT;
@@ -35,9 +43,15 @@ void init_client(t_client *client) {
 	client->address.sin_port = htons(client->server_port);
 	Inet_pton(AF_INET, client->server_ip, &client->address.sin_addr);
 }
-// TODO close socket upon every fail to let server know about it
-// not always just exit
-void send_file(t_client *client) { // or just use sendfile() but it's platform specific
+
+// TODO not always just exit -- check actual errors
+/**
+ * Sends the file "client->file_name" to the server.
+ * Note: it would have been better to use sendfile() system call,
+ * but it's interface is platform-specific.
+ * @param client pointer to the client struct
+ */
+void send_file(t_client *client) {
 	int file_fd = open(client->file_name, O_RDONLY);
 	if (file_fd == -1) {
 		perror("open failed");
@@ -45,14 +59,14 @@ void send_file(t_client *client) { // or just use sendfile() but it's platform s
 		exit(EXIT_FAILURE);
 	}
 	char buf[BUF_SIZE] = {0};
-	int n_read = 0;
 	while (1) {
-		n_read = read(file_fd, buf, sizeof buf);
+		int n_read = read(file_fd, buf, sizeof buf);
 		if (n_read == 0) {
 			break;
 		}
 		if (n_read == -1) {
 			perror("read failed");
+			close(client->fd);
 			exit(EXIT_FAILURE);
 		}
 		char *p = buf;
@@ -60,13 +74,12 @@ void send_file(t_client *client) { // or just use sendfile() but it's platform s
 			int n_written = write(client->fd, p, n_read);
 			if (n_written == -1) {
 				perror("write failed");
-				exit(EXIT_FAILURE); // close
+				close(client->fd);
+				exit(EXIT_FAILURE);
 			}
 			n_read -= n_written;
 			p += n_written;
-
 		}
-		write(client->fd, buf, n_read); // protect
 	}
 	close(file_fd);
 }
@@ -76,7 +89,9 @@ int main(int argc, char *argv[]) {
 	check_args(argc, argv, &client);
 	init_client(&client);
 
-	Connect(client.fd, (struct sockaddr *) &client.address, sizeof client.address);
+	Connect(client.fd,
+			(struct sockaddr *) &client.address,
+					sizeof client.address);
 
 	send_file(&client);
 
