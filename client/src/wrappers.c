@@ -48,7 +48,7 @@ int Inet_pton(int af, const char *restrict src, void *restrict dst) {
 	int	res = inet_pton(af, src, dst);
 	if (res == 0) {
 		fprintf(stderr,
-				"inet_pton failed: the address is not parseable"
+				"inet_pton failed: the address is not parseable "
 				"in the specified address family\n");
 		exit(EXIT_FAILURE);
 	} else if (res == -1) {

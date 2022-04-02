@@ -5,9 +5,9 @@ void check_args(int argc, char *argv[], t_client *client) {
 	if (argc == 1) {
 		client->server_port = DEFAULT_PORT;
 		client->server_ip = DEFAULT_IP;
-		client->file_name = "send.txt"
+		client->file_name = "send.txt";
 	} else if (argc == 4) {
-		client->server_ip = agrv[1];
+		client->server_ip = argv[1];
 		int port = atoi(argv[2]);
 		if (0 < port && port < 65536) {
 			client->server_port = port;
