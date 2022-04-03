@@ -64,12 +64,14 @@ void receive_file(int client_fd, char *dir_name) {
 		if (n_read == -1) {
 			perror("read failed");
 			close(file_fd);
+			remove(file_name);
 			close(client_fd);
 			exit(EXIT_FAILURE);
 		}
 		if (write(file_fd, buf, n_read) == -1) {
 			perror("write failed");
 			close(file_fd);
+			remove(file_name);
 			close(client_fd);
 			exit(EXIT_FAILURE);
 		}
